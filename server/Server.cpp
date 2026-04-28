@@ -1,5 +1,4 @@
 #include "Server.hpp"
-#include "Connection.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -7,7 +6,8 @@
 #include <iostream>
 #include <cstring>
 
-Server::Server(int port, int backlog) {
+Server::Server(int port, int backlog)
+    : clientManager_(broadcaster_) {
     listenFd_ = createListeningSocket(port, backlog);
     std::cout << "[server] Listening on port " << port << "\n";
 }
@@ -38,22 +38,6 @@ int Server::createListeningSocket(int port, int backlog) {
     return fd;
 }
 
-void Server::handleClient(int clientFd) {
-    std::cout << "[server] Client connected fd=" << clientFd << "\n";
-
-    char buf[1024];
-    while (true) {
-        ssize_t n = recv(clientFd, buf, sizeof(buf) - 1, 0);
-        if (n <= 0) {
-            std::cout << "[server] Client disconnected fd=" << clientFd << "\n";
-            break;
-        }
-        buf[n] = '\0';
-        std::cout << "[server] Received: " << buf;
-    }
-    ::close(clientFd);
-}
-
 void Server::run() {
     running_ = true;
     while (running_) {
@@ -64,13 +48,16 @@ void Server::run() {
                               reinterpret_cast<sockaddr*>(&clientAddr),
                               &addrLen);
         if (clientFd < 0) {
-            if (!running_) break;
+            if (!running_) break;        
             std::cerr << "[server] accept() error: " << strerror(errno) << "\n";
             continue;
         }
 
-        handleClient(clientFd);
+        std::cout << "[server] New connection fd=" << clientFd << "\n";
+        clientManager_.addClient(clientFd);
+        clientManager_.clean();
     }
+    clientManager_.stopAll();
 }
 
 void Server::stop() {

@@ -1,13 +1,16 @@
-#include "Server.hpp"
+#include "server/Server.hpp"
 #include <iostream>
 #include <stdexcept>
 
-int main() {
+int main(int argc, char* argv[]) {
+    int port = 9000;
+    if (argc > 1) port = std::stoi(argv[1]);
+
     try {
-        Server server(9000);
+        Server server(port);
         server.run();
-    } catch (const std::exception& e) {
-        std::cerr << "[server] Fatal: " << e.what() << "\n";
+    } catch (const std::exception& ex) {
+        std::cerr << "[error] " << ex.what() << "\n";
         return 1;
     }
     return 0;
