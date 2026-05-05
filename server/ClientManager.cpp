@@ -1,6 +1,6 @@
 #include "ClientManager.hpp"
+#include "../common/Logger.hpp"
 #include <algorithm>
-#include <iostream>
 
 ClientManager::ClientManager(MessageBroadcaster& broadcaster)
     : broadcaster_(broadcaster) {}
@@ -25,6 +25,7 @@ void ClientManager::clean() {
 
 void ClientManager::stopAll() {
     std::lock_guard<std::mutex> lock(mutex_);
+    LOG_INFO("manager", "Stopping all " << sessions_.size() << " session(s)");
     for (auto& s : sessions_) s->stop();
     sessions_.clear();
 }

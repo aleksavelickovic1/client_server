@@ -1,5 +1,6 @@
 #include "UiMessageReceiver.hpp"
 #include "../common/Protocol.hpp"
+#include "../common/Logger.hpp"
 
 UiMessageReceiver::UiMessageReceiver(Connection& connection, QObject* parent)
     : QObject(parent), connection_(connection) {}
@@ -31,11 +32,13 @@ void UiMessageReceiver::run() {
                 text = "*** " + QString::fromStdString(msg.payload) + " ***";
                 break;
             default:
+                LOG_WARN("receiver", "Unknown message type, ignoring");
                 continue;
         }
         emit messageReceived(text);
     }
     if (running_) {
+        LOG_INFO("receiver", "Disconnected from server");
         emit disconnected();
         running_ = false;
     }

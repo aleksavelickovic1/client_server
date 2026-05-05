@@ -1,5 +1,6 @@
 #include "MessageReceiver.hpp"
 #include "../common/Protocol.hpp"
+#include "../common/Logger.hpp"
 #include <iostream>
 
 MessageReceiver::MessageReceiver(Connection& connection)
@@ -31,10 +32,12 @@ void MessageReceiver::run() {
                 std::cout << "--- " << msg.payload << " ---\n";
                 break;
             default:
+                LOG_WARN("receiver", "Unknown message type, ignoring");
                 break;
         }
     }
     if (running_) {
+        LOG_INFO("receiver", "Disconnected from server");
         std::cout << "\n[disconnected from server]\n";
         running_ = false;
     }

@@ -1,8 +1,8 @@
 #include "ClientSession.hpp"
 #include "../common/Protocol.hpp"
+#include "../common/Logger.hpp"
 #include <sys/socket.h>
 #include <unistd.h>
-#include <iostream>
 
 ClientSession::ClientSession(int fd, MessageBroadcaster& broadcaster)
     : fd_(fd), broadcaster_(broadcaster) {}
@@ -24,7 +24,7 @@ void ClientSession::stop() {
     }
     if (thread_.joinable()) thread_.join();
 }
-    
+
 bool ClientSession::readLine(std::string& out) {
     out.clear();
     char ch;
@@ -46,25 +46,24 @@ void ClientSession::run() {
 
     auto loginMsg = Protocol::parse(line);
     if (loginMsg.type != MessageType::LOGIN || loginMsg.payload.empty()) {
-        std::cerr << "[session fd=" << fd_ << "] Bad login.\n";
+        LOG_WARN("session", "Bad login on fd=" << fd_ << ", dropping");
         running_ = false;
         return;
     }
 
     username_ = loginMsg.payload;
-    std::cout << "[server] User '" << username_ << "' joined (fd=" << fd_ << ")\n";
-
+    LOG_INFO("session", "User '" << username_ << "' joined (fd=" << fd_ << ")");
     broadcaster_.broadcast(Protocol::makeSys("User " + username_ + " joined"));
 
     while (running_ && readLine(line)) {
         auto msg = Protocol::parse(line);
         if (msg.type == MessageType::MSG) {
-            std::cout << "[server] " << username_ << ": " << msg.payload << "\n";
+            LOG_DEBUG("session", username_ << ": " << msg.payload);
             broadcaster_.broadcast(Protocol::makeMsg(username_, msg.payload));
         }
     }
 
-    std::cout << "[server] User '" << username_ << "' left (fd=" << fd_ << ")\n";
+    LOG_INFO("session", "User '" << username_ << "' left (fd=" << fd_ << ")");
     broadcaster_.removeClient(fd_);
     broadcaster_.broadcast(Protocol::makeSys("User " + username_ + " left"));
     running_ = false;

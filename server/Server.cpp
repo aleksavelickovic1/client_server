@@ -1,15 +1,15 @@
 #include "Server.hpp"
+#include "../common/Logger.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <stdexcept>
-#include <iostream>
 #include <cstring>
 
 Server::Server(int port, int backlog)
     : clientManager_(broadcaster_) {
     listenFd_ = createListeningSocket(port, backlog);
-    std::cout << "[server] Listening on port " << port << "\n";
+    LOG_INFO("server", "Listening on port " << port);
 }
 
 Server::~Server() {
@@ -48,12 +48,12 @@ void Server::run() {
                               reinterpret_cast<sockaddr*>(&clientAddr),
                               &addrLen);
         if (clientFd < 0) {
-            if (!running_) break;        
-            std::cerr << "[server] accept() error: " << strerror(errno) << "\n";
+            if (!running_) break;
+            LOG_ERROR("server", "accept() error: " << strerror(errno));
             continue;
         }
 
-        std::cout << "[server] New connection fd=" << clientFd << "\n";
+        LOG_INFO("server", "New connection fd=" << clientFd);
         clientManager_.addClient(clientFd);
         clientManager_.clean();
     }
