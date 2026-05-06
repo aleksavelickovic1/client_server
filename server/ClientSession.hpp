@@ -6,10 +6,16 @@
 
 class ClientSession {
 public:
+    // Creates session for a connected client
     ClientSession(int fd, MessageBroadcaster& broadcaster);
+
+    // Cleans up resources and stops the session
     ~ClientSession();
 
+    // Starts session thread
     void start();
+
+    // Stops session and closes connection
     void stop();
 
     int fd() const { return fd_; }
@@ -17,7 +23,10 @@ public:
     bool isRunning() const { return running_; }
 
 private:
+    // Main loop: handles login and incoming messages
     void run();
+
+    // Reads a single line (until '\n') from socket
     bool readLine(std::string& out);
 
     int fd_;

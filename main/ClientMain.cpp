@@ -3,6 +3,7 @@
 #include <string>
 #include "common/Logger.hpp"
 
+// Prints program usage instructions
 static void printUsage() {
     std::cerr << "Usage: chat_client <host> <port> [--ui | --cli]\n";
     std::cerr << "  --cli  (default) run in terminal mode\n";
@@ -11,6 +12,7 @@ static void printUsage() {
 
 #include "client/Client.hpp"
 
+// Runs client in CLI mode
 static int runCli(const std::string& host, int port) {
     try {
         Client client(host, port);
@@ -26,6 +28,7 @@ static int runCli(const std::string& host, int port) {
 #include <QApplication>
 #include "ui/ChatWindow.hpp"
 
+// Runs client with UI
 static int runUi(int argc, char* argv[], const std::string& host, int port) {
     try {
         QApplication app(argc, argv);
