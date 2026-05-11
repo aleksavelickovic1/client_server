@@ -19,17 +19,23 @@ UiClient::~UiClient() {
 }
 
 void UiClient::connectToServer(const std::string& username) {
-    LOG_INFO("ui_client", "Connecting to " << host_ << ":" << port_
-                          << " as '" << username << "'");
     connection_.connect(host_, port_);
-
     if (!connection_.send(Protocol::makeLogin(username)))
         throw std::runtime_error("Failed to send LOGIN");
 
-    LOG_INFO("ui_client", "Connected as '" << username << "'");
+    std::string response;
+    if (!connection_.readLine(response))
+        throw std::runtime_error("Server disconnected");
+
+    auto msg = Protocol::parse(response);
+    if (msg.type == MessageType::ERROR)
+        throw std::runtime_error(msg.payload);
+
+    if (msg.type == MessageType::SYS)
+        emit messageReceived(QString("*** %1 ***").arg(QString::fromStdString(msg.payload)));
+
     receiver_.start();
 }
-
 bool UiClient::sendMessage(const std::string& text) {
     bool ok = connection_.send("MSG|" + text + "\n");
     LOG_DEBUG("input", "Sending message: " << text);

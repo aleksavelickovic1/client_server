@@ -31,6 +31,12 @@ void MessageReceiver::run() {
             case MessageType::SYS:
                 std::cout << "--- " << msg.payload << " ---\n";
                 break;
+            case MessageType::PRIVATE:
+                std::cout << msg.payload << "\n";
+                break;
+            case MessageType::ERROR:
+                std::cout << "[!] " << msg.payload << "\n";
+                break;
             default:
                 LOG_WARN("receiver", "Unknown message type, ignoring");
                 break;

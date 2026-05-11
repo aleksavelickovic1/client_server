@@ -27,8 +27,8 @@ signals:
     void disconnected();
 
 private:
-    std::string     host_;
-    int             port_;
-    Connection      connection_;
-    UiMessageReceiver receiver_;
+    std::string         host_;
+    int                 port_;
+    Connection          connection_;
+    UiMessageReceiver   receiver_;
 };

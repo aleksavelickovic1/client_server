@@ -31,6 +31,12 @@ void UiMessageReceiver::run() {
             case MessageType::SYS:
                 text = "*** " + QString::fromStdString(msg.payload) + " ***";
                 break;
+            case MessageType::PRIVATE:
+                text = QString::fromStdString(msg.payload);
+                break;
+            case MessageType::ERROR:
+                text = "[!] " + QString::fromStdString(msg.payload);
+                break;
             default:
                 LOG_WARN("receiver", "Unknown message type, ignoring");
                 continue;
